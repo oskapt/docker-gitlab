@@ -11,7 +11,9 @@ Pre-Build Configuration
 ### config.yml
 
 This is used for gitlab-shell.  If you have an external Redis server
-(see below), then you'll want to put that information here. *FIXME*
+(see below), then you'll want to put that information here.  If you 
+don't have one or its IP will change, you can leave this alone and it will
+be set by `/start` when the container boots. *FIXME*
 
 ### gitlab.yml
 
@@ -92,7 +94,7 @@ Building The Container
 Once you've completed all of the pre-build tasks, you can build the 
 container with:
 
-    sudo docker -t <username>/gitlab build .
+    sudo docker build -t <username>/gitlab .
 
 Replace <username> with your username or replace the entire tag with 
 whatever works for your installation.  
@@ -109,7 +111,15 @@ doing it.  Leave it alone, and it will finish in 15 or 30 minutes.
     user    0m0.032s
     sys     0m0.408s
     
-Yuck.
+*Yuck.*  I love you, Vagrant.
+
+    Successfully built e0004df90309
+
+    real    17m54.119s
+    user    0m0.128s
+    sys     0m0.252s
+    
+<3 you too, Xen Server.
 
 Running The Container
 ---------------------
@@ -137,14 +147,31 @@ It can be the host itself or a URL for a top-level load balancer that
 directs traffic to the correct port.  This is used by `/start` to set 
 the hostname for nginx and Gitlab.
 
+#### Pipework
+
+The script is integrated with [Pipework](https://github.com/oskapt/pipework),
+which configures a static IP inside of the containers.  I do this because
+I run a lot of containers within Vagrant, and I want them to reliably
+talk to each other.  If you'd like the same functionality, you can set
+`D_IP` or use the `-i` option to run.sh.
+
+#### Ports
+
+The Dockerfile set this up to expose 80 on 8888, 443 on 8443, and 9999 on 
+whatever dynamic port is available.  If you want to change these, set the
+`PORTS` variable to the docker ports directive you would like
+to see.  For example, to expose 80 and 443 on their actual ports, use:
+
+    PORTS="-p 80:80 -p 443:443"
+
 ### Execution
 
 If you want to start the container interactively, use `-sf` to start a
 shell.  From there you can run `/start` and background it to look around
 at the system.
 
-For general production use, simply execute `run.sh` with no options.  It 
-will perform the following actions:
+For general production use, simply set all of your variables and 
+execute `run.sh` with no options.  It will perform the following actions:
 
 * start the container, mounting the `repositories` directory under
 `/home/git`

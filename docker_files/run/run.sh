@@ -2,15 +2,32 @@
 
 D_VERBOSE=false
 D_FOREGROUND=false
+
+# The source directory (on the docker host) for our persistent data
 D_WORKSPACE=/workspace/docker-gitlab/docker_files/run/repositories
-D_IP=10.66.8.111/26
-D_REDIS_HOST=10.66.8.110:6379
-D_GITLAB_HOST=localhost
+
+# IP to assign via Pipework
+D_IP=
+
+# Where we can find Redis
+D_REDIS_HOST=
+
+# How we want to appear in Gitlab URLs
+D_GITLAB_HOST="localhost"
+
+# Start a shell?
 D_SHELL=false
+
+# Pipework bridge interface (probably just leave this alone)
 D_BRIDGE=br1
 
+# Where do we find pipework script?
 PIPEWORK=$(pwd)/pipework
+
+# What is the name (or tag) for the container?
 IMAGE="monachus/gitlab"
+
+# Where in the container do we want to mount $WORKSPACE?
 MOUNT=/home/git/repositories
 
 function usage() {
@@ -32,11 +49,17 @@ EOF
 }
 
 function get_ip() {
-    LOCAL_IP=$( ip a sh dev $1 | grep inet | grep -v inet6 | awk '{ print $2 }' | awk -F/ '{ print $1 }' )
+    # Helper function to return an IP address from a provided interface
+    DEV=$1
+    ip a sh dev $DEV >/dev/null 2>&1 
+    if [[ $? ]]; then
+        LOCAL_IP=$( ip a sh dev $1 2>/dev/null | grep inet | grep -v inet6 | awk '{ print $2 }' | awk -F/ '{ print $1 }' )
+    fi
 }
 
-if [[ $(whoami) != "root" ]]; then
-    echo "Please run this with root privileges."
+if [[ $(whoami) != "root" || ! $(groups) =~ docker ]]; then
+    echo "Please run this with root privileges or as a user"
+    echo "in the 'docker' group."
     exit 1
 fi
 
@@ -79,6 +102,7 @@ do
     esac
 done
 
+# Assign options or default variables to working variables
 WORKSPACE=${OPT_WORKSPACE:-$D_WORKSPACE}
 SHELL=${OPT_SHELL:-''}
 BRIDGE=${OPT_BRIDGE:-$D_BRIDGE}
@@ -86,10 +110,19 @@ REDIS_HOST=${OPT_REDIS_HOST:-$D_REDIS_HOST}
 GITLAB_HOST=${OPT_GITLAB_HOST:-$D_GITLAB_HOST}
 IP=${OPT_IP:-$D_IP}
 
+# Set our ENV vars for docker
 ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
 
-# Figure out a local IP to attach apache redirects to
-for DEV in eth1 eth2; do
+# If you want to map exposed ports to specific ports, set the docker 
+# port directive here, like
+#    PORTS="-p 80:8080 -p 443:4443"
+PORTS=
+
+# Try to find a local IP on the box.  This is available inside of the
+# container for situations where the container has to know what its
+# host's IP is (such as a container inside of Vagrant sending traffic
+# to the Vagrant IP)
+for DEV in eth0 eth1 eth2; do
     get_ip ${DEV}
     if [[ ${LOCAL_IP} =~ [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]];  then
         break
@@ -97,34 +130,42 @@ for DEV in eth1 eth2; do
     LOCAL_IP=
 done
 
-# Add any extra environment variables here
+# Add any extra environment variables here, like
+# ENVVARS="${ENVVARS} -e X=Y -e A=B"
 ENVVARS="${ENVVARS}"
 
-CMD="docker run ${ENVVARS} -d -v ${WORKSPACE}:${MOUNT} ${INTERACTIVE} ${IMAGE} ${SHELL}" 
+# Create our command
+CMD="docker run ${ENVVARS} -d ${PORTS} -v ${WORKSPACE}:${MOUNT} ${INTERACTIVE} ${IMAGE} ${SHELL}" 
 
 if [[ ${VERBOSE} ]]; then
 	echo "Starting container with command:"
 	echo "    ${CMD}"
 fi
 
+# Launch the container
 CID=$($CMD)
 
-if [[ ! -e ${PIPEWORK} ]]; then
-	echo "Unable to execute ${PIPEWORK}" 1>&2
-elif [ ! -z ${CID} ]; then
-    sleep 1
-    ${PIPEWORK} ${BRIDGE} ${CID} ${IP}
-    if [[ $? -eq 0 ]]; then
-    	if [[ ${VERBOSE} ]]; then
-        	echo "Pipework IP running on ${IP}"
-    	fi 
+# Set up static IP with pipework (if provided)
+if [[ ! -z ${IP} ]]; then
+    if [[ ! -e ${PIPEWORK} ]]; then
+    	echo "Unable to execute ${PIPEWORK}" 1>&2
+    elif [ ! -z ${CID} ]; then
+        sleep 1
+        ${PIPEWORK} ${BRIDGE} ${CID} ${IP}
+        if [[ $? -eq 0 ]]; then
+        	if [[ ${VERBOSE} ]]; then
+            	echo "Pipework IP running on ${IP}"
+        	fi 
+        else
+            echo "Error setting up pipework." 1>&2
+        fi
     else
         echo "Error setting up pipework." 1>&2
-    fi
-else
-    echo "Error setting up pipework." 1>&2
-fi        
+    fi        
+fi
 
+# If we're running in the foreground, attach to the container.  Otherwise
+# just print out our container's ID.
 if [[ ${OPT_FOREGROUND} ]]; then
     echo "Press enter to activate your session."
     docker attach ${CID}
