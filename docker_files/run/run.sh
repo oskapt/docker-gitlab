@@ -6,10 +6,12 @@ D_FOREGROUND=false
 # The source directory (on the docker host) for our persistent data
 D_WORKSPACE=/workspace/docker-gitlab/docker_files/run/repositories
 
-# IP to assign via Pipework
+# IP to assign via Pipework.  Include a netmask, like
+#     D_IP=192.168.55.55/24
 D_IP=
 
-# Where we can find Redis
+# Where we can find Redis.  Be sure to include the port number:
+#     D_REDIS_HOST=192.168.55.10:6379
 D_REDIS_HOST=
 
 # How we want to appear in Gitlab URLs
@@ -57,7 +59,7 @@ function get_ip() {
     fi
 }
 
-if [[ $(whoami) != "root" || ! $(groups) =~ docker ]]; then
+if [[ $(whoami) != "root" && ! $(groups) =~ docker ]]; then
     echo "Please run this with root privileges or as a user"
     echo "in the 'docker' group."
     exit 1
@@ -110,14 +112,6 @@ REDIS_HOST=${OPT_REDIS_HOST:-$D_REDIS_HOST}
 GITLAB_HOST=${OPT_GITLAB_HOST:-$D_GITLAB_HOST}
 IP=${OPT_IP:-$D_IP}
 
-# Set our ENV vars for docker
-ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
-
-# If you want to map exposed ports to specific ports, set the docker 
-# port directive here, like
-#    PORTS="-p 80:8080 -p 443:4443"
-PORTS=
-
 # Try to find a local IP on the box.  This is available inside of the
 # container for situations where the container has to know what its
 # host's IP is (such as a container inside of Vagrant sending traffic
@@ -130,9 +124,30 @@ for DEV in eth0 eth1 eth2; do
     LOCAL_IP=
 done
 
+# Make a guess that Redis is running locally
+if [[ -z ${REDIS_HOST} ]]; then
+    LISTEN=$(netstat -an | grep 6379 | grep LIST | awk '{ print $4 }')
+    if [[ ! -z ${LISTEN} ]]; then
+        # Something is listening
+        REDIS_HOST=$( echo ${LISTEN} | awk -F: '{ print $1 }' )
+        if [[ -z ${REDIS_HOST} || ${REDIS_HOST} = '0.0.0.0' ]]; then
+            # It's listening on all interfaces
+            REDIS_HOST="${LOCAL_IP}:6379"
+        fi
+    fi    
+fi
+
+# Set our ENV vars for docker
+ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
+
 # Add any extra environment variables here, like
 # ENVVARS="${ENVVARS} -e X=Y -e A=B"
 ENVVARS="${ENVVARS}"
+
+# If you want to map exposed ports to specific ports, set the docker 
+# port directive here, like
+#    PORTS="-p 80:8080 -p 443:4443"
+PORTS=
 
 # Create our command
 CMD="docker run ${ENVVARS} -d ${PORTS} -v ${WORKSPACE}:${MOUNT} ${INTERACTIVE} ${IMAGE} ${SHELL}" 
@@ -167,7 +182,7 @@ fi
 # If we're running in the foreground, attach to the container.  Otherwise
 # just print out our container's ID.
 if [[ ${OPT_FOREGROUND} ]]; then
-    echo "Press enter to activate your session."
+    echo "If you don't see a prompt, press enter to activate your session."
     docker attach ${CID}
     echo
 else
