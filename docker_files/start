@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Point sidekiq at our redis server
+echo "production: redis://${REDIS_HOST}:6379" > /home/git/gitlab/config/resque.yml
+
+# Update nginx config
+sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /etc/nginx/conf.d/gitlab.conf
+
+# Update gitlab.yml
+sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /home/git/gitlab/config/gitlab.yml
+chown git /home/git/gitlab/config/gitlab.yml
+
+# Validate permissions on repos directory (doesn't work)
+chmod -R ug+rwX,o-rwx /home/git/repositories/
+chmod -R ug-s /home/git/repositories/
+find /home/git/repositories/ -type d -print0 | sudo xargs -0 chmod g+s
+
+
+/usr/bin/supervisord -n
