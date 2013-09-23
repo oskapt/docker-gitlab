@@ -32,6 +32,11 @@ IMAGE="monachus/gitlab"
 # Where in the container do we want to mount $WORKSPACE?
 MOUNT=/home/git/repositories
 
+# If you want to map exposed ports to specific ports, set the docker 
+# port directive here, like
+#    PORTS="-p 80:8080 -p 443:4443"
+PORTS=
+
 function usage() {
 cat <<EOF
 
@@ -143,11 +148,6 @@ ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_H
 # Add any extra environment variables here, like
 # ENVVARS="${ENVVARS} -e X=Y -e A=B"
 ENVVARS="${ENVVARS}"
-
-# If you want to map exposed ports to specific ports, set the docker 
-# port directive here, like
-#    PORTS="-p 80:8080 -p 443:4443"
-PORTS=
 
 # Create our command
 CMD="docker run ${ENVVARS} -d ${PORTS} -v ${WORKSPACE}:${MOUNT} ${INTERACTIVE} ${IMAGE} ${SHELL}" 
