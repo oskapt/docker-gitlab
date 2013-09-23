@@ -4,7 +4,7 @@ D_VERBOSE=false
 D_FOREGROUND=false
 
 # The source directory (on the docker host) for our persistent data
-D_WORKSPACE=/workspace/docker-gitlab/docker_files/run/repositories
+D_WORKSPACE=/opt/docker/docker-gitlab/docker_files/run/repositories
 
 # IP to assign via Pipework.  Include a netmask, like
 #     D_IP=192.168.55.55/24
