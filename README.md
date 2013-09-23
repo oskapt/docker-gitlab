@@ -79,6 +79,12 @@ If your Redis container is already running in detached mode, you can find its IP
 Put this address into all of the config sections of `resque.yml`.  From what
 I'm able to determine, it doesn't pay attention to the `RAILS_ENV=production` setting 
 during the install, so we need to just hit it with a shotgun blast.
+
+### Supervisor Configuration
+
+Supervisor will start with an HTTP server listening on port 9999 with the
+username of `docker` and the password of `d0ck3r`.  If you want to change these,
+edit `docker.conf` and make the necessary changes.  
   
 Building The Container
 ----------------------
@@ -96,6 +102,14 @@ package management and containers, but just let it do its thing.  It will
 take you back to the days when you used to compile all software from source
 (Gentoo - I'm looking at you, here), and you'll remember why you stopped 
 doing it.  Leave it alone, and it will finish in 15 or 30 minutes.
+
+    Successfully built 85cc29045023
+
+    real    37m41.481s
+    user    0m0.032s
+    sys     0m0.408s
+    
+Yuck.
 
 Running The Container
 ---------------------

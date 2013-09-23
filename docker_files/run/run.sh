@@ -86,11 +86,6 @@ REDIS_HOST=${OPT_REDIS_HOST:-$D_REDIS_HOST}
 GITLAB_HOST=${OPT_GITLAB_HOST:-$D_GITLAB_HOST}
 IP=${OPT_IP:-$D_IP}
 
-if [[ -z ${NODE} && -z ${SHELL} ]]; then
-	echo "Please provide a node number with -n"
-	exit 1
-fi
-
 ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
 
 # Figure out a local IP to attach apache redirects to

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Point sidekiq at our redis server
-echo "production: redis://${REDIS_HOST}:6379" > /home/git/gitlab/config/resque.yml
+echo "production: redis://${REDIS_HOST}" > /home/git/gitlab/config/resque.yml
 
 # Update nginx config
 sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /etc/nginx/conf.d/gitlab.conf
