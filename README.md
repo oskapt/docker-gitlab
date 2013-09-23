@@ -145,7 +145,8 @@ respectively.
 #### REDIS_HOST
 
 This is the hostname or IP for your Redis server.  Include the port
-number after a colon.  
+number after a colon.  If you don't provide this, the script will check
+for a Redis server running locally and use that IP.  Fancy!
 
 #### GITLAB_HOST
 
