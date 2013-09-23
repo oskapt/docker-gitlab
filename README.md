@@ -87,6 +87,13 @@ during the install, so we need to just hit it with a shotgun blast.
 Supervisor will start with an HTTP server listening on port 9999 with the
 username of `docker` and the password of `d0ck3r`.  If you want to change these,
 edit `docker.conf` and make the necessary changes.  
+
+### SSL Configuration
+
+Replace `gitlab.crt` and `gitlab.key` with your own SSL key and 
+certificate.  If you need a certificate chain, read 
+[the docs](http://nginx.org/en/docs/http/configuring_https_servers.html#chains)
+on the nginx site before continuing.
   
 Building The Container
 ----------------------
@@ -197,6 +204,15 @@ this setup guide).  You will find the web interface for supervisor running on po
 You can log into Gitlab with the username `admin@local.host` and the password
 `5iveL!fe`.
 
+Post-build changes
+------------------
+
+This thing is a bitch to build, and most of it busts the docker cache.
+What happens if you need to change one file?  Rather than re-build the
+whole container, you can start it in shell mode (`-sf` to `run.sh`), 
+copy in your changes (use cat with > or use `docker insert`), and then
+re-tag the container before exiting with `docker tag`.  Life is good.
+
 
 Not Tested / Known Not To Work
 ==============================
@@ -206,7 +222,6 @@ of Gitlab.  I'm able to log in, create users, create a project, clone it
 via HTTP and push content from my local repository back up to it via
 HTTP.  I have not configured or tested any of the following:
 
-* HTTPS (something you'll want for production)
 * Sending email
 * Notifications via Sidekiq (or whatever it's used for)
 
