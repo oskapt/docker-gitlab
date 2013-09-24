@@ -214,6 +214,12 @@ whole container, you can start it in shell mode (`-sf` to `run.sh`),
 copy in your changes (use cat with > or use `docker insert`), and then
 re-tag the container before exiting with `docker tag`.  Life is good.
 
+Errata
+======
+
+09/23/2013 - Postfix is running now as a daemon, launched out of `/start`.
+I couldn't (quickly) find a nice way to put it under supervisor, so if you 
+have any thoughts, let me know at github.
 
 Not Tested / Known Not To Work
 ==============================
@@ -223,7 +229,6 @@ of Gitlab.  I'm able to log in, create users, create a project, clone it
 via HTTP and push content from my local repository back up to it via
 HTTP.  I have not configured or tested any of the following:
 
-* Sending email
 * Notifications via Sidekiq (or whatever it's used for)
 
 In addition, there is no SSH server.  Since this is running inside of a

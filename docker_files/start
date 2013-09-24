@@ -20,4 +20,7 @@ chmod -R ug+rwX,o-rwx /home/git/repositories/
 chmod -R ug-s /home/git/repositories/
 find /home/git/repositories/ -type d -print0 | sudo xargs -0 chmod g+s
 
+# Have to daemonize postfix.  Sucks.
+/etc/init.d/postfix start
+
 /usr/bin/supervisord -n
