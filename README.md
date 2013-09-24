@@ -13,7 +13,9 @@ Pre-Build Configuration
 This is used for gitlab-shell.  If you have an external Redis server
 (see below), then you'll want to put that information here.  If you 
 don't have one or its IP will change, you can leave this alone and it will
-be set by `/start` when the container boots. *FIXME*
+be set by `/start` when the container boots. The `gitlab_url` directive
+should stay at localhost.  This appears to be for API calls, so have it
+hit the local instance of unicorn.
 
 ### gitlab.yml
 
@@ -211,8 +213,8 @@ Post-build changes
 This thing is a bitch to build, and most of it busts the docker cache.
 What happens if you need to change one file?  Rather than re-build the
 whole container, you can start it in shell mode (`-sf` to `run.sh`), 
-copy in your changes (use cat with > or use `docker insert`), and then
-re-tag the container before exiting with `docker tag`.  Life is good.
+make your changes , and then commit the container before exiting with 
+`docker commit`.  Life is good.
 
 Errata
 ======
@@ -220,6 +222,8 @@ Errata
 09/23/2013 - Postfix is running now as a daemon, launched out of `/start`.
 I couldn't (quickly) find a nice way to put it under supervisor, so if you 
 have any thoughts, let me know at github.
+09/24/2013 - It's now running an SSH server mapped to port 2222 on the 
+docker host.  Push/pull/keys over SSH with gitlab-shell all seem to work.
 
 Not Tested / Known Not To Work
 ==============================
@@ -231,8 +235,4 @@ HTTP.  I have not configured or tested any of the following:
 
 * Notifications via Sidekiq (or whatever it's used for)
 
-In addition, there is no SSH server.  Since this is running inside of a
-container, I'm not even sure what needs to change to get it to recognize
-the layer of abstraction between itself and the user.  As long as we
-can talk to it over HTTP/HTTPS, that seems good enough for now.
 

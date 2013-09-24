@@ -23,4 +23,7 @@ find /home/git/repositories/ -type d -print0 | sudo xargs -0 chmod g+s
 # Have to daemonize postfix.  Sucks.
 /etc/init.d/postfix start
 
+# sshd priv sep directory
+mkdir /var/run/sshd
+
 /usr/bin/supervisord -n
