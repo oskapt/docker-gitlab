@@ -37,8 +37,8 @@ pid "/home/git/gitlab/tmp/pids/unicorn.pid"
 # By default, the Unicorn logger will write to stderr.
 # Additionally, some applications/frameworks log to stderr or stdout,
 # so prevent them from going to /dev/null when daemonized here:
-stderr_path "/home/git/gitlab/log/unicorn.stderr.log"
-stdout_path "/home/git/gitlab/log/unicorn.stdout.log"
+#stderr_path "/home/git/gitlab/log/unicorn.stderr.log"
+#stdout_path "/home/git/gitlab/log/unicorn.stdout.log"
 
 # combine Ruby 2.0.0dev or REE with "preload_app true" for memory savings
 # http://rubyenterpriseedition.com/faq.html#adapt_apps_for_cow
