@@ -39,9 +39,9 @@ RUN /home/git/configure-gitlab.sh
 # Nginx
 RUN rm /etc/nginx/sites-enabled/default
 ADD docker_files/nginx.conf /etc/nginx/nginx.conf
-#ADD docker_files/gitlab.nginx.conf /etc/nginx/conf.d/gitlab.conf
-#ADD docker_files/gitlab.key /home/git/gitlab.key
-#ADD docker_files/gitlab.crt /home/git/gitlab.crt
+ADD docker_files/gitlab.nginx.conf /etc/nginx/conf.d/gitlab.conf
+ADD docker_files/gitlab.key /home/git/gitlab.key
+ADD docker_files/gitlab.crt /home/git/gitlab.crt
 
 # Supervisor
 ADD docker_files/docker.conf /etc/supervisor/conf.d/
