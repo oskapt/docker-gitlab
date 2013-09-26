@@ -1,0 +1,6 @@
+09/24/2013 - monachus - It's now running an SSH server mapped to port 2222 on the 
+docker host.  Push/pull/keys over SSH with gitlab-shell all seem to work.
+09/23/2013 - monachus - Postfix is running now as a daemon, launched out of `/start`.
+I couldn't (quickly) find a nice way to put it under supervisor, so if you 
+have any thoughts, let me know at github.
+

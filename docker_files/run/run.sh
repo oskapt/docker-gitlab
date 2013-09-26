@@ -4,7 +4,7 @@ D_VERBOSE=false
 D_FOREGROUND=false
 
 # The source directory (on the docker host) for our persistent data
-D_WORKSPACE=/opt/docker/docker-gitlab/docker_files/run/repositories
+D_WORKSPACE=/opt/docker/docker-gitlab/docker_files/run/data
 
 # IP to assign via Pipework.  Include a netmask, like
 #     D_IP=192.168.55.55/24
@@ -30,7 +30,7 @@ PIPEWORK=$(pwd)/pipework
 IMAGE="monachus/gitlab"
 
 # Where in the container do we want to mount $WORKSPACE?
-MOUNT=/home/git/repositories
+MOUNT=/home/git/data
 
 # If you want to map exposed ports to specific ports, set the docker 
 # port directive here, like

@@ -1,29 +1,57 @@
 #!/bin/bash
 
+function link() {
+    source=$1
+    dest=/home/git/data/$(basename $source)
+    
+    if [[ -d $source && ! -d $dest ]]; then
+        mv $source $dest && ln -s $dest $source
+    elif [[ -d $dest ]]; then
+        if [[ ! -h $source ]]; then
+            rsync -avpz $source/ $dest/
+            rm -fr $source && ln -s $dest $source
+        elif [[ ! -e $source ]]; then
+            ln -s $dest $source
+        fi  
+    fi 
+}
+
+# Make sure some things are moved/pointed to our persistent data directory
+# logs
+link /home/git/gitlab/log
+link /home/git/.ssh
+link /home/git/gitlab/config
+link /home/git/gitlab-shell/config.yml
+
+if [[ ! -h /etc/nginx/conf.d/gitlab.conf ]]; then
+    ln -s /home/git/data/gitlab.conf /etc/nginx/conf.d/gitlab.conf
+fi
+
 # Point sidekiq at our redis server
-echo "production: redis://${REDIS_HOST}" > /home/git/gitlab/config/resque.yml
+#echo "production: redis://${REDIS_HOST}" > /home/git/gitlab/config/resque.yml
 
 # Update nginx config
 sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /etc/nginx/conf.d/gitlab.conf
 
 # Update gitlab.yml
-sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /home/git/gitlab/config/gitlab.yml
-chown git /home/git/gitlab/config/gitlab.yml
+#sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /home/git/gitlab/config/gitlab.yml
+#chown git /home/git/gitlab/config/gitlab.yml
 
 # Update config.yml
-REDIS_HOST=$(echo $REDIS_HOST | awk -F: '{ print $1 }')
-sed -ie "s/REDIS_HOST/${REDIS_HOST}/" /home/git/gitlab-shell/config.yml
-chown git /home/git/gitlab-shell/config.yml
+#REDIS_HOST=$(echo $REDIS_HOST | awk -F: '{ print $1 }')
+#sed -ie "s/REDIS_HOST/${REDIS_HOST}/" /home/git/gitlab-shell/config.yml
+#chown git /home/git/gitlab-shell/config.yml
 
 # Validate permissions on repos directory (doesn't work)
-chmod -R ug+rwX,o-rwx /home/git/repositories/
-chmod -R ug-s /home/git/repositories/
-find /home/git/repositories/ -type d -print0 | sudo xargs -0 chmod g+s
+chmod -R ug+rwX,o-rwx /home/git/data/repositories/
+chmod -R ug-s /home/git/data/repositories/
+find /home/git/data/repositories/ -type d -print0 | sudo xargs -0 chmod g+s
+
 
 # Have to daemonize postfix.  Sucks.
 /etc/init.d/postfix start
 
 # sshd priv sep directory
-mkdir /var/run/sshd
+[[ ! -d /var/run/sshd ]] && mkdir /var/run/sshd
 
 /usr/bin/supervisord -n

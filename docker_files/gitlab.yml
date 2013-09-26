@@ -149,13 +149,13 @@ production: &base
 
   ## Backup settings
   backup:
-    path: "tmp/backups"   # Relative paths are relative to Rails.root (default: tmp/backups/)
-    # keep_time: 604800   # default: 0 (forever) (in seconds)
+    path: "data/backups"   # Relative paths are relative to Rails.root (default: tmp/backups/)
+    keep_time: 604800   # default: 0 (forever) (in seconds)
 
   ## GitLab Shell settings
   gitlab_shell:
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
-    repos_path: /home/git/repositories/
+    repos_path: /home/git/data/repositories/
     hooks_path: /home/git/gitlab-shell/hooks/
 
     # Git over HTTP

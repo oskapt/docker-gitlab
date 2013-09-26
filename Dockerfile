@@ -8,12 +8,12 @@ RUN apt-get -y update
 ENV DEBIAN_FRONTEND noninteractive
 ENV GITLAB_DATABASE mysql
 
-RUN apt-get -y install postfix python-software-properties sudo git build-essential libicu-dev libxml2-dev libxslt-dev libmysqlclient-dev redis-server openssh-server
+RUN apt-get -qq install postfix python-software-properties sudo git build-essential libicu-dev libxml2-dev libxslt-dev libmysqlclient-dev redis-server openssh-server nginx
 
 RUN add-apt-repository ppa:brightbox/ruby-ng-experimental
-RUN apt-get -y update
+RUN apt-get -qq update
 
-RUN apt-get -y install ruby2.0 ruby2.0-dev
+RUN apt-get -qq install ruby2.0 ruby2.0-dev
 
 RUN gem install --no-ri --no-rdoc bundler
 
@@ -37,12 +37,11 @@ ADD docker_files/configure-gitlab.sh /home/git/
 RUN /home/git/configure-gitlab.sh
 
 # Nginx
-RUN apt-get -y install nginx
 RUN rm /etc/nginx/sites-enabled/default
 ADD docker_files/nginx.conf /etc/nginx/nginx.conf
-ADD docker_files/gitlab.nginx.conf /etc/nginx/conf.d/gitlab.conf
-ADD docker_files/gitlab.key /home/git/gitlab.key
-ADD docker_files/gitlab.crt /home/git/gitlab.crt
+#ADD docker_files/gitlab.nginx.conf /etc/nginx/conf.d/gitlab.conf
+#ADD docker_files/gitlab.key /home/git/gitlab.key
+#ADD docker_files/gitlab.crt /home/git/gitlab.crt
 
 # Supervisor
 RUN apt-get -y install supervisor
@@ -53,5 +52,4 @@ EXPOSE 9999 8888:80 4443:443 2222:22
 
 CMD ["/start"]
 
- 
 

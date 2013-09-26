@@ -216,15 +216,6 @@ whole container, you can start it in shell mode (`-sf` to `run.sh`),
 make your changes , and then commit the container before exiting with 
 `docker commit`.  Life is good.
 
-Errata
-======
-
-09/23/2013 - Postfix is running now as a daemon, launched out of `/start`.
-I couldn't (quickly) find a nice way to put it under supervisor, so if you 
-have any thoughts, let me know at github.
-09/24/2013 - It's now running an SSH server mapped to port 2222 on the 
-docker host.  Push/pull/keys over SSH with gitlab-shell all seem to work.
-
 Not Tested / Known Not To Work
 ==============================
 
