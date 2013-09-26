@@ -36,8 +36,8 @@ fi
 chown -R git:git $MOUNT
 chown git:git $MOUNT/authorized_keys
 chmod 644 $MOUNT/authorized_keys
-chown www-data /home/git/config/gitlab.key
-chmod 600 /home/git/config/gitlab.key
+chown www-data $MOUNT/config/gitlab.key
+chmod 600 $MOUNT/config/gitlab.key
 
 # Have to daemonize postfix.  Sucks.
 /etc/init.d/postfix start

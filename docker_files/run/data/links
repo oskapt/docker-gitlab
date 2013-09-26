@@ -6,5 +6,5 @@
 /home/git/gitlab.crt config/gitlab.crt
 /home/git/gitlab.key config/gitlab.key
 /home/git/tmp/backups backups
-home/git/public public
+/home/git/public public
 
