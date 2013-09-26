@@ -8,6 +8,15 @@ container...the gems are pretty heavy.
 Pre-Build Configuration
 -----------------------
 
+There are a number of pre-configuration steps that you'll need to carry
+out, mostly around setting up config files.  Some of these files have
+data that is needed during the install.  Others have data that is used
+when the software is running.  Configure everything now, and it will be
+installed in the `config` directory.  When you launch and run the
+container the first time, this directory will be copied and 
+symlinked to your persistent data directory.  This will allow you to make
+any changes afterward, according to your site's needs.
+
 ### config.yml
 
 This is used for gitlab-shell.  If you have an external Redis server
@@ -183,13 +192,15 @@ at the system.
 For general production use, simply set all of your variables and 
 execute `run.sh` with no options.  It will perform the following actions:
 
-* start the container, mounting the `repositories` directory under
-`/home/git`
+* start the container, mounting the `data` directory under
+`/home/git/data`
 * execute `/start`
-    * sets the redis host in `resque.yml`
-    * sets the Gitlab host in nginx's `gitlab.conf`
-    * sets the Gitlab host in gitlab's `gitlab.yml`
-    * attempts to set permissions on the `repositories` directory
+    * copies the `config` directory contents to `data/config` if they 
+      are missing; otherwise only rsyncs missing content.
+    * copies and symlinks `/etc/nginx/conf.d/gitlab.conf` to `data/config/nginx.conf`
+    * moves the `log` directory and symlinks it
+    * symlinks gitlab-shell's `config.yml`
+    * sets permissions for content under `data`
     * executes supervisor
 * supervisor will
     * start unicorn
@@ -210,11 +221,11 @@ You can log into Gitlab with the username `admin@local.host` and the password
 Post-build changes
 ------------------
 
-This thing is a bitch to build, and most of it busts the docker cache.
-What happens if you need to change one file?  Rather than re-build the
-whole container, you can start it in shell mode (`-sf` to `run.sh`), 
-make your changes , and then commit the container before exiting with 
-`docker commit`.  Life is good.
+Hopefully we've captured all of the data that you might want to view or
+change under the `data` directory.  If not, open an issue or submit a
+pull request, and we'll review it for inclusion.  You can change anything
+under the `config` directory and restart unicorn to have your changes
+take effect.
 
 Not Tested / Known Not To Work
 ==============================

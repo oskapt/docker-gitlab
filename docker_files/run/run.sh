@@ -142,6 +142,13 @@ if [[ -z ${REDIS_HOST} ]]; then
     fi    
 fi
 
+# Configure permissions in the repositories directory under $MOUNT
+if [[ -d ${MOUNT}/repositories ]]; then
+    chmod -R ug+rwX,o-rwx ${MOUNT}/repositories/ > /dev/null
+    chmod -R ug-s ${MOUNT}/repositories/ > /dev/null
+    find ${MOUNT}/repositories/ -type d -print0 | xargs -0 chmod g+s > /dev/null
+fi
+
 # Set our ENV vars for docker
 ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
 
