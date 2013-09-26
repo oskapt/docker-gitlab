@@ -167,11 +167,13 @@ to see.  For example, to expose 80 and 443 on their actual ports, use:
 
 ### Execution
 
-The first time that the container is run it will copy over the contents
-of the `config` directory and then exit.  This gives you an opportunity
-to review/configure anything still outstanding before launching the 
-container permanently.  Future runs will execute `/start` normally, which
-symlinks the internal directories to the persistent datastore.
+#### Persistent Data
+The file `links` in the `data` folder contains a list of source/destination
+pairs for files/directories.  The source will be copied over to the destination
+and replaced with a symlink.  If the source is a directory that didn't 
+previously exist, then the container will exit and allow you to make any
+configuration changes to the file contents.  Future executions will start
+the container normally.
 
 If you want to start the container interactively, use `-sf` to start a
 shell.  From there you can run `/start` and background it to look around
@@ -183,11 +185,7 @@ execute `run.sh` with no options.  It will perform the following actions:
 * start the container, mounting the `data` directory under
 `/home/git/data`
 * execute `/start`
-    * copies the `config` directory contents to `data/config` if they 
-      are missing; otherwise only rsyncs missing content.
-    * copies and symlinks `/etc/nginx/conf.d/gitlab.conf` to `data/config/nginx.conf`
-    * moves the `log` directory and symlinks it
-    * symlinks gitlab-shell's `config.yml`
+    * sets up links to content as defined in `links` file
     * sets permissions for content under `data`
     * executes supervisor
 * supervisor will

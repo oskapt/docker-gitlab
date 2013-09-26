@@ -1,0 +1,10 @@
+# source destination
+/home/git/gitlab/log log 
+/home/git/gitlab/config config
+/home/git/gitlab-shell/config.yml config/config.yml
+/etc/nginx/conf.d/gitlab.conf config/nginx.conf
+/home/git/gitlab.crt config/gitlab.crt
+/home/git/gitlab.key config/gitlab.key
+/home/git/tmp/backups backups
+home/git/public public
+
