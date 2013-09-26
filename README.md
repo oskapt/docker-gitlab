@@ -17,42 +17,6 @@ container the first time, this directory will be copied and
 symlinked to your persistent data directory.  This will allow you to make
 any changes afterward, according to your site's needs.
 
-### config.yml
-
-This is used for gitlab-shell.  If you have an external Redis server
-(see below), then you'll want to put that information here.  If you 
-don't have one or its IP will change, you can leave this alone and it will
-be set by `/start` when the container boots. The `gitlab_url` directive
-should stay at localhost.  This appears to be for API calls, so have it
-hit the local instance of unicorn.
-
-### gitlab.yml
-
-This is the configuration file for the main Gitlab process.
-
-Edit `host` (line 18) and `email_from` (line 36) to reflect your site's
-information.  If you don't have that information now, don't stress.  Leave
-it with `YOUR_URL_HERE` and the `/start` script will change it when
-the container boots.
-
-### unicorn.rb
-
-Since we're running in a container, it's not likely that you'll need to
-change any of the settings here, but you can take a look if you'd like.
-
-### Database Configuration
-
-1. You'll need to have the database already up and running.  Take a peek at
-[the docs](https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/databases.md) 
-for more info on that.  Once you've built your preferred database backend,
-edit the appropriate config file under `docker_files`:
-    * `database.yml.mysql`
-    * `database.yml.postgresql`
-2. After editing, save the file as `database.yml`.
-3. Edit `Dockerfile` and set the `ENV` variable to your chosen
-database backend (either 'mysql' or 'postgresql').  This tells the 
-install script which options to pass to the gem during install.
-
 ### Redis configuration
 
 Gitlab's use of Redis is rather vague, and the documentation (as of 09/21/2013)
@@ -93,6 +57,40 @@ Put this address into all of the config sections of `resque.yml`.  From what
 I'm able to determine, it doesn't pay attention to the `RAILS_ENV=production` setting 
 during the install, so we need to just hit it with a shotgun blast.
 
+### config.yml
+
+This is used for gitlab-shell.  If you have an external Redis server
+(see above), then you'll want to put that information here. The `gitlab_url` directive
+should stay at localhost.  This appears to be for API calls, so have it
+hit the local instance of unicorn.
+
+### gitlab.yml
+
+This is the configuration file for the main Gitlab process.
+
+Edit `host` (line 18) and `email_from` (line 36) to reflect your site's
+information.  If you don't have that information now, don't stress.  Leave
+it with `YOUR_URL_HERE` and change it after the first time the container
+starts.
+
+### unicorn.rb
+
+Since we're running in a container, it's not likely that you'll need to
+change any of the settings here, but you can take a look if you'd like.
+
+### Database Configuration
+
+1. You'll need to have the database already up and running.  Take a peek at
+[the docs](https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/databases.md) 
+for more info on that.  Once you've built your preferred database backend,
+edit the appropriate config file under `docker_files`:
+    * `database.yml.mysql`
+    * `database.yml.postgresql`
+2. After editing, save the file as `database.yml`.
+3. Edit `Dockerfile` and set the `ENV` variable to your chosen
+database backend (either 'mysql' or 'postgresql').  This tells the 
+install script which options to pass to the gem during install.
+
 ### Supervisor Configuration
 
 Supervisor will start with an HTTP server listening on port 9999 with the
@@ -105,6 +103,9 @@ Replace `gitlab.crt` and `gitlab.key` with your own SSL key and
 certificate.  If you need a certificate chain, read 
 [the docs](http://nginx.org/en/docs/http/configuring_https_servers.html#chains)
 on the nginx site before continuing.
+
+If you don't have these now, that's fine.  The sample cert and key will be
+installed and linked to the `config` directory.  You can replace them later.
   
 Building The Container
 ----------------------

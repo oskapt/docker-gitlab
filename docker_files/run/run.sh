@@ -142,6 +142,12 @@ if [[ -z ${REDIS_HOST} ]]; then
     fi    
 fi
 
+# Make sure we have our persistent data directories
+for DIR in config repositories; do
+    if [[ ! -d ${WORKSPACE}/${DIR} ]]; then
+        mkdir ${WORKSPACE}/${DIR}
+    fi
+done
 # Configure permissions in the repositories directory under $MOUNT
 if [[ -d ${MOUNT}/repositories ]]; then
     chmod -R ug+rwX,o-rwx ${MOUNT}/repositories/ > /dev/null

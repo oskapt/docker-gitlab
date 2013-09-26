@@ -8,7 +8,7 @@ RUN apt-get -y update
 ENV DEBIAN_FRONTEND noninteractive
 ENV GITLAB_DATABASE mysql
 
-RUN apt-get -qq install postfix python-software-properties sudo git build-essential libicu-dev libxml2-dev libxslt-dev libmysqlclient-dev redis-server openssh-server nginx
+RUN apt-get -qq install postfix python-software-properties sudo git build-essential libicu-dev libxml2-dev libxslt-dev libmysqlclient-dev redis-server openssh-server nginx supervisor
 
 RUN add-apt-repository ppa:brightbox/ruby-ng-experimental
 RUN apt-get -qq update
@@ -44,7 +44,6 @@ ADD docker_files/nginx.conf /etc/nginx/nginx.conf
 #ADD docker_files/gitlab.crt /home/git/gitlab.crt
 
 # Supervisor
-RUN apt-get -y install supervisor
 ADD docker_files/docker.conf /etc/supervisor/conf.d/
 ADD docker_files/start /start
 
