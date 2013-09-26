@@ -2,43 +2,42 @@
 
 function link() {
     source=$1
-    dest=/home/git/data/$(basename $source)
+    dest=/home/git/data/$2
     
     if [[ -d $source && ! -d $dest ]]; then
         mv $source $dest && ln -s $dest $source
     elif [[ -d $dest ]]; then
         if [[ ! -h $source ]]; then
-            rsync -avpz $source/ $dest/
+            rsync -avpz --ignore-existing $source/ $dest/
             rm -fr $source && ln -s $dest $source
         elif [[ ! -e $source ]]; then
             ln -s $dest $source
-        fi  
+        fi
+    elif [[ -f $source && ! -h $source ]]; then
+        cp $source $dest && ln -sf $dest $source  
     fi 
 }
 
 # Make sure some things are moved/pointed to our persistent data directory
 # logs
-link /home/git/gitlab/log
-link /home/git/.ssh
-link /home/git/gitlab/config
-link /home/git/gitlab-shell/config.yml
-
-if [[ ! -h /etc/nginx/conf.d/gitlab.conf ]]; then
-    ln -s /home/git/data/gitlab.conf /etc/nginx/conf.d/gitlab.conf
-fi
+link /home/git/gitlab/log log 
+#link /home/git/.ssh
+link /home/git/gitlab/config config
+link /home/git/gitlab-shell/config.yml config/config.yml
+link /etc/nginx/conf.d/gitlab.conf config/nginx.conf
 
 # Point sidekiq at our redis server
-#echo "production: redis://${REDIS_HOST}" > /home/git/gitlab/config/resque.yml
+#"production: redis://${REDIS_HOST}" > /home/git/gitlab/config/resque.yml
 
 # Update nginx config
-sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /etc/nginx/conf.d/gitlab.conf
+#sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /etc/nginx/conf.d/gitlab.conf
 
 # Update gitlab.yml
 #sed -ie "s/YOUR_URL_HERE/${GITLAB_HOST}/" /home/git/gitlab/config/gitlab.yml
 #chown git /home/git/gitlab/config/gitlab.yml
 
 # Update config.yml
-#REDIS_HOST=$(echo $REDIS_HOST | awk -F: '{ print $1 }')
+#REDIS_HOST=$($REDIS_HOST | awk -F: '{ print $1 }')
 #sed -ie "s/REDIS_HOST/${REDIS_HOST}/" /home/git/gitlab-shell/config.yml
 #chown git /home/git/gitlab-shell/config.yml
 
