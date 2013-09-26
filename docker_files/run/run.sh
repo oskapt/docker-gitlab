@@ -10,13 +10,6 @@ D_WORKSPACE=/opt/docker/docker-gitlab/docker_files/run/data
 #     D_IP=192.168.55.55/24
 D_IP=
 
-# Where we can find Redis.  Be sure to include the port number:
-#     D_REDIS_HOST=192.168.55.10:6379
-D_REDIS_HOST=
-
-# How we want to appear in Gitlab URLs
-D_GITLAB_HOST="localhost"
-
 # Start a shell?
 D_SHELL=false
 
@@ -49,8 +42,6 @@ OPTIONS:
   -i    ip [${D_IP}] 
   -s    start shell [${D_SHELL}]
   -b    bridge interface [${D_BRIDGE}]
-  -r    redis host [${D_REDIS_HOST}]  
-  -g    gitlab host [${D_GITLAB_HOST}] 
 
 EOF
 }
@@ -70,7 +61,7 @@ if [[ $(whoami) != "root" && ! $(groups) =~ docker ]]; then
     exit 1
 fi
 
-while getopts "hvfw:i:sbr:g:" OPTION
+while getopts "hvfw:i:sb:" OPTION
 do
     case $OPTION in
         h)
@@ -96,12 +87,6 @@ do
         b)
             OPT_BRIDGE=$OPTARG
             ;;
-        r)
-            OPT_REDIS_HOST=$OPTARG
-            ;;
-        g)
-            OPT_GITLAB_HOST=$OPTARG
-            ;;
         ?)
             usage
             exit 1
@@ -113,8 +98,6 @@ done
 WORKSPACE=${OPT_WORKSPACE:-$D_WORKSPACE}
 SHELL=${OPT_SHELL:-''}
 BRIDGE=${OPT_BRIDGE:-$D_BRIDGE}
-REDIS_HOST=${OPT_REDIS_HOST:-$D_REDIS_HOST}
-GITLAB_HOST=${OPT_GITLAB_HOST:-$D_GITLAB_HOST}
 IP=${OPT_IP:-$D_IP}
 
 # Try to find a local IP on the box.  This is available inside of the
@@ -128,19 +111,6 @@ for DEV in eth0 eth1 eth2; do
     fi
     LOCAL_IP=
 done
-
-# Make a guess that Redis is running locally
-if [[ -z ${REDIS_HOST} ]]; then
-    LISTEN=$(netstat -an | grep 6379 | grep LIST | awk '{ print $4 }')
-    if [[ ! -z ${LISTEN} ]]; then
-        # Something is listening
-        REDIS_HOST=$( echo ${LISTEN} | awk -F: '{ print $1 }' )
-        if [[ -z ${REDIS_HOST} || ${REDIS_HOST} = '0.0.0.0' ]]; then
-            # It's listening on all interfaces
-            REDIS_HOST="${LOCAL_IP}:6379"
-        fi
-    fi    
-fi
 
 # Make sure we have our persistent data directories
 if [[ ! -d ${WORKSPACE} ]]; then
@@ -162,7 +132,7 @@ if [[ -d ${MOUNT}/repositories ]]; then
 fi
 
 # Set our ENV vars for docker
-ENVVARS="-e MOUNT=${MOUNT} -e REDIS_HOST=${REDIS_HOST} -e GITLAB_HOST=${GITLAB_HOST} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
+ENVVARS="-e MOUNT=${MOUNT} -e IP=$( echo ${IP} | awk -F/ '{ print $1 }' )"
 
 # Add any extra environment variables here, like
 # ENVVARS="${ENVVARS} -e X=Y -e A=B"
