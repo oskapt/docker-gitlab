@@ -17,8 +17,10 @@ function link() {
         elif [[ ! -e $source ]]; then
             ln -s $dest $source
         fi
-    elif [[ -f $source && ! -h $source ]]; then
+    elif [[ -f $source && ! -f $dest ]]; then
         cp $source $dest && ln -sf $dest $source  
+    elif [[ -f $dest && ! -h $source ]]; then
+        ln -sf $dest $source
     fi 
 }
 
