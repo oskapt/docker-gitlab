@@ -2,7 +2,7 @@
 
 function link() {
     source=$1
-    dest=/home/git/data/$2
+    dest=$MOUNT/$2
     
     if [[ -d $source && ! -d $dest ]]; then
         mv $source $dest && ln -s $dest $source
@@ -28,9 +28,9 @@ link /etc/nginx/conf.d/gitlab.conf config/nginx.conf
 link /home/git/gitlab.crt config/gitlab.crt
 link /home/git/gitlab.key config/gitlab.key
 
-chown -R git:git /home/git/data
-chown git:git /home/git/data/authorized_keys
-chmod 644 /home/git/data/authorized_keys
+chown -R git:git $MOUNT
+chown git:git $MOUNT/authorized_keys
+chmod 644 $MOUNT/authorized_keys
 chown www-data /home/git/config/gitlab.key
 chmod 600 /home/git/config/gitlab.key
 

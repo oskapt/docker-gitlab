@@ -145,27 +145,8 @@ Running The Container
 
 The container environment is configured and run from `run.sh` in the
 `docker_files/run` directory.  This directory also contains a directory
-called `repositories` that will be mounted at `/home/git/repositories` and
-contain the persistent repository data.
-
-### Options
-
-You can edit the script to set permanent values for `REDIS_HOST` and
-`GITLAB_HOST` or you can set them when running by using `-r` and `-g`
-respectively.  
-
-#### REDIS_HOST
-
-This is the hostname or IP for your Redis server.  Include the port
-number after a colon.  If you don't provide this, the script will check
-for a Redis server running locally and use that IP.  Fancy!
-
-#### GITLAB_HOST
-
-This is the hostname that you use to connect to your Gitlab instance.
-It can be the host itself or a URL for a top-level load balancer that
-directs traffic to the correct port.  This is used by `/start` to set 
-the hostname for nginx and Gitlab.
+called `data` that will be mounted at `/home/git/data` and
+contain the persistent data.
 
 #### Pipework
 
@@ -185,6 +166,12 @@ to see.  For example, to expose 80 and 443 on their actual ports, use:
     PORTS="-p 80:80 -p 443:443"
 
 ### Execution
+
+The first time that the container is run it will copy over the contents
+of the `config` directory and then exit.  This gives you an opportunity
+to review/configure anything still outstanding before launching the 
+container permanently.  Future runs will execute `/start` normally, which
+symlinks the internal directories to the persistent datastore.
 
 If you want to start the container interactively, use `-sf` to start a
 shell.  From there you can run `/start` and background it to look around

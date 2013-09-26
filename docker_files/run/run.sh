@@ -143,11 +143,17 @@ if [[ -z ${REDIS_HOST} ]]; then
 fi
 
 # Make sure we have our persistent data directories
-for DIR in config repositories; do
-    if [[ ! -d ${WORKSPACE}/${DIR} ]]; then
-        mkdir ${WORKSPACE}/${DIR}
-    fi
-done
+if [[ ! -d ${WORKSPACE} ]]; then
+    echo "No workspace directory: ${WORKSPACE}.  Exiting."
+    exit 1
+else
+    for DIR in config repositories; do
+        if [[ ! -d ${WORKSPACE}/${DIR} ]]; then
+            mkdir ${WORKSPACE}/${DIR}
+        fi
+    done
+fi
+
 # Configure permissions in the repositories directory under $MOUNT
 if [[ -d ${MOUNT}/repositories ]]; then
     chmod -R ug+rwX,o-rwx ${MOUNT}/repositories/ > /dev/null
