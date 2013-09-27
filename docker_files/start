@@ -11,15 +11,17 @@ function link() {
         # can be made to the contents (if needed)
         NOBOOT=1
     elif [[ -d $dest ]]; then
-        if [[ ! -h $source ]]; then
+        if [[ ! -e $source ]]; then
+            ln -s $dest $source
+        elif [[ ! -h $source ]]; then
             rsync -avpz --ignore-existing $source/ $dest/
             rm -fr $source && ln -s $dest $source
-        elif [[ ! -e $source ]]; then
-            ln -s $dest $source
         fi
     elif [[ -f $source && ! -f $dest ]]; then
         cp $source $dest && ln -sf $dest $source  
     elif [[ -f $dest && ! -h $source ]]; then
+        ln -sf $dest $source
+    elif [[ ! -e $source && -e $dest ]]; then
         ln -sf $dest $source
     fi 
 }
@@ -36,8 +38,9 @@ if [[ -f ${MOUNT}/links ]]; then
 fi
 
 chown -R git:git $MOUNT
-chown git:git $MOUNT/authorized_keys
-chmod 644 $MOUNT/authorized_keys
+chmod 700 $MOUNT/ssh
+chown git:git $MOUNT/ssh/authorized_keys
+chmod 644 $MOUNT/ssh/authorized_keys
 chown www-data $MOUNT/config/gitlab.key
 chmod 600 $MOUNT/config/gitlab.key
 

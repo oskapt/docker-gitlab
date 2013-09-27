@@ -7,4 +7,4 @@
 /home/git/gitlab.key config/gitlab.key
 /home/git/tmp/backups backups
 /home/git/public public
-
+/home/git/.ssh ssh
